@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Random;
 
 
@@ -14,7 +12,6 @@ public class Point{
 	public int type;
 	public double staticField;
 	public boolean isPedestrian;
-	public boolean strażak;
 	public int x;
 	public int y;
 	public float smokeDensity = 0;
@@ -49,7 +46,7 @@ public class Point{
 	}
 	
 	public int move(){
-		if (isPedestrian && !blocked && !strażak){
+		if (isPedestrian && !blocked){
 			Random random = new Random();
 			Point nextP = this;
 			ArrayList<Point> nextPos = new ArrayList<Point>();
@@ -78,56 +75,10 @@ public class Point{
 				}
 				if (!nextP.isPedestrian){
 					if (nextP.type != 2){
-						int tmp = random.nextInt(100);
 						nextP.isPedestrian = true;
 						nextP.blocked = true;
-						if(tmp <40) nextP.strażak = true;
 					}
 					this.isPedestrian = false;
-				}
-			}
-		}else if(isPedestrian && strażak && !blocked){
-			Random random = new Random();
-			Point nextP = this;
-			ArrayList<Point> nextPos = new ArrayList<Point>();
-			double theBiggest = this.smokeDensity;
-			for (Point neigh : neighbors){
-				if (neigh.smokeDensity> theBiggest && !neigh.isPedestrian && neigh.type != 1) theBiggest = neigh.smokeDensity;
-			}
-			for (Point neigh : neighbors){
-				if (neigh.smokeDensity == theBiggest && theBiggest != 0 && !neigh.isPedestrian && neigh.type != 1 && neigh.type != 2) nextPos.add(neigh);
-			}
-			if (!nextPos.isEmpty()) {
-				int id = random.nextInt(nextPos.size());
-				nextP = nextPos.get(id);
-				if (!nextP.isPedestrian) {
-					if (nextP.type != 4) {
-						nextP.isPedestrian = true;
-						nextP.blocked = true;
-						nextP.strażak = true;
-						nextP.makeClean();
-					}else if(nextP.type == 4){
-						nextP.isPedestrian = true;
-						nextP.blocked = true;
-						nextP.strażak = true;
-						nextP.makeClean();
-						nextP.type = 0;
-						nextP.smokeDensity = 0;
-						this.isPedestrian = false;
-						this.strażak = false;
-						return 1;
-					}
-					this.isPedestrian = false;
-					this.strażak = false;
-					nextP.blocked = true;
-				}
-			}
-			else if (nextP == this){
-				if (nextP.smokeDensity == 0){
-					if (nextP.type != 2){
-						nextP.isPedestrian = true;
-						nextP.strażak = false;
-					}
 				}
 			}
 		}

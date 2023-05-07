@@ -9,17 +9,12 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.event.MouseInputListener;
 
-import java.util.HashSet;
-
 public class Board extends JComponent implements MouseInputListener, ComponentListener {
 	private static final long serialVersionUID = 1L;
 	private Point[][] pointer;
 	private int size = 10;
 	public int editType=0;
-	private int neighborhood = 1;
 	private String version = "moore";
-	private int height;
-	private int length;
 	private int repulsionRadius;	
 	private static final int SFMAX = 100000;
 
@@ -30,8 +25,6 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		setBackground(Color.WHITE);
 		setOpaque(true);
 		initialize(length, height);
-		this.length = length;
-		this.height = height;
 		repulsionRadius = (int) (0.06*Math.min(length,height));
 	}
 

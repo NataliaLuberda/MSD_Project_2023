@@ -18,7 +18,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	private int repulsionRadius;	
 	private static final int SFMAX = 100000;
 	private int iteration;
-	private static int fireConst = 3;
+	private static int fireConst = 2; //~ 10 / (10 - 4)
 
 	public Board(int length, int height) {
 		addMouseListener(this);

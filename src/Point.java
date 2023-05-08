@@ -17,7 +17,7 @@ public class Point{
 	public float smokeDensity = 0;
 	public boolean checker = false;
 	private int iteration;
-	private static int peopleConst = 7;
+	private static int peopleConst = 5; // 10 / (10 - 8)
 
 	public Point(int x,int y) {
 		type=0;

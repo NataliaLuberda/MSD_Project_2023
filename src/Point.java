@@ -16,6 +16,8 @@ public class Point{
 	public int y;
 	public float smokeDensity = 0;
 	public boolean checker = false;
+	private int iteration;
+	private static int peopleConst = 7;
 
 	public Point(int x,int y) {
 		type=0;
@@ -23,6 +25,7 @@ public class Point{
 		neighbors= new ArrayList<Point>();
 		this.x = x;
 		this.y = y;
+		iteration = 0;
 	}
 	
 	public void clear() {
@@ -46,7 +49,7 @@ public class Point{
 	}
 	
 	public int move(){
-		if (isPedestrian && !blocked){
+		if (isPedestrian && !blocked && iteration % peopleConst != 0){
 			Random random = new Random();
 			Point nextP = this;
 			ArrayList<Point> nextPos = new ArrayList<Point>();
@@ -82,6 +85,7 @@ public class Point{
 				}
 			}
 		}
+		iteration++;
 		return 0;
 		
 	}

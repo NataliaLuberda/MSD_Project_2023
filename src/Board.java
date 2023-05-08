@@ -17,6 +17,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	private String version = "moore";
 	private int repulsionRadius;	
 	private static final int SFMAX = 100000;
+	private int iteration;
+	private static int fireConst = 3;
 
 	public Board(int length, int height) {
 		addMouseListener(this);
@@ -26,6 +28,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		setOpaque(true);
 		initialize(length, height);
 		repulsionRadius = (int) (0.06*Math.min(length,height));
+		iteration = 0;
 	}
 
 	public void iteration() {
@@ -43,12 +46,13 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 					clearFire(pointer[x][y]);
 				}else if(pointer[x][y].type == 1){
 					makeBarier(pointer[x][y]);
-				}else if(pointer[x][y].type ==4){
+				}else if(pointer[x][y].type ==4 && iteration % fireConst == 0){
 					calculateFire(pointer[x][y]);
 				}
 			}
 		}
 		this.repaint();
+		iteration++;
 	}
 
 	public void clear() {

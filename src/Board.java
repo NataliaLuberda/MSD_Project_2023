@@ -19,6 +19,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	private static final int SFMAX = 100000;
 	private int iteration;
 	private static int fireConst = 2; //~ 10 / (10 - 4)
+	private int roomSize;
+	private int doorsNumber = 6;
 
 	public Board(int length, int height) {
 		addMouseListener(this);
@@ -26,7 +28,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		addMouseMotionListener(this);
 		setBackground(Color.WHITE);
 		setOpaque(true);
-		initialize(length, height);
+		roomSize = Math.min(length,height)/5;
+		initialize(length, height,roomSize);
 		repulsionRadius = (int) (0.06*Math.min(length,height));
 		iteration = 0;
 	}
@@ -64,47 +67,85 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		this.repaint();
 	}
 
-	private void initialize(int length, int height) {
-		pointer = new Point[length][height];
-		ArrayList<Point> walls = new ArrayList<Point>();
-		for (int x = 0; x < pointer.length; ++x){
-			for (int y = 0; y < pointer[x].length; ++y){
-				pointer[x][y] = new Point(x,y);
-				if(x==0 || y==0 || x == pointer.length-1 || y == pointer[x].length-1){
-					pointer[x][y].type = 1;
-					pointer[x][y].staticField = 1000000;
-					walls.add(pointer[x][y]);
-				}
-			}
+	private void initialize(int length, int height, int distanceFromCenter) {
+    pointer = new Point[length][height];
+    ArrayList<Point> walls = new ArrayList<Point>();
+    int centerX = length/2;
+    int centerY = height/2;
+    for (int x = 0; x < pointer.length; ++x){
+		for (int y = 0; y < pointer[x].length; ++y){
+			pointer[x][y] = new Point(x,y);
 		}
-
-		for (int x = 1; x < pointer.length-1; ++x) {
-			for (int y = 1; y < pointer[x].length-1; ++y) {
-					if(version == "moore"){
-						pointer[x][y].addNeighbor(pointer[x+1][y]);
-						pointer[x][y].addNeighbor(pointer[x+1][y+1]);
-						pointer[x][y].addNeighbor(pointer[x][y+1]);
-						pointer[x][y].addNeighbor(pointer[x+1][y-1]);
-						pointer[x][y].addNeighbor(pointer[x][y-1]);
-						pointer[x][y].addNeighbor(pointer[x-1][y-1]);
-						pointer[x][y].addNeighbor(pointer[x-1][y+1]);
-						pointer[x][y].addNeighbor(pointer[x-1][y]);
-					}else if (version == "neuman"){
-						pointer[x][y].addNeighbor(pointer[x+1][y]);
-						pointer[x][y].addNeighbor(pointer[x][y+1]);
-						pointer[x][y].addNeighbor(pointer[x][y-1]);
-						pointer[x][y].addNeighbor(pointer[x-1][y]);
-					}
-				}
-		}
-
-		while(!walls.isEmpty()){
-			Point pointe = walls.get(0);
-			makeBarier(pointe);
-			walls.remove(0);
-		}
-		
 	}
+    // Dodanie punktów tworzących kwadrat w kolejności
+    // od lewej do prawej, od góry do dołu.
+    for (int y = centerY - distanceFromCenter; y <= centerY + distanceFromCenter; y++) {
+		int x = centerX + distanceFromCenter;
+		pointer[x][y].type = 1;
+		pointer[x][y].staticField = 1000000;
+		walls.add(pointer[x][y]);
+    }
+
+	for (int x = centerX + distanceFromCenter-1; x >= centerX - distanceFromCenter; x--) {
+		int y = centerY + distanceFromCenter;
+		pointer[x][y].type = 1;
+		pointer[x][y].staticField = 1000000;
+		walls.add(pointer[x][y]);
+    }
+
+	for (int y = centerY + distanceFromCenter-1; y >= centerY - distanceFromCenter; y--) {
+		int x = centerX - distanceFromCenter;
+		pointer[x][y].type = 1;
+		pointer[x][y].staticField = 1000000;
+		walls.add(pointer[x][y]);
+    }
+
+	for (int x = centerX - distanceFromCenter + 1; x < centerX + distanceFromCenter; x++) {
+		int y = centerY - distanceFromCenter;
+		pointer[x][y].type = 1;
+		pointer[x][y].staticField = 1000000;
+		walls.add(pointer[x][y]);
+    }
+
+
+
+    for (int x = 1; x < pointer.length-1; ++x) {
+        for (int y = 1; y < pointer[x].length-1; ++y) {
+            if(version == "moore"){
+                pointer[x][y].addNeighbor(pointer[x+1][y]);
+                pointer[x][y].addNeighbor(pointer[x+1][y+1]);
+                pointer[x][y].addNeighbor(pointer[x][y+1]);
+                pointer[x][y].addNeighbor(pointer[x+1][y-1]);
+                pointer[x][y].addNeighbor(pointer[x][y-1]);
+                pointer[x][y].addNeighbor(pointer[x-1][y-1]);
+                pointer[x][y].addNeighbor(pointer[x-1][y+1]);
+                pointer[x][y].addNeighbor(pointer[x-1][y]);
+            } else if (version == "neuman"){
+                pointer[x][y].addNeighbor(pointer[x+1][y]);
+                pointer[x][y].addNeighbor(pointer[x][y+1]);
+                pointer[x][y].addNeighbor(pointer[x][y-1]);
+                pointer[x][y].addNeighbor(pointer[x-1][y]);
+            }
+        }
+		}
+
+		int len_walls = walls.size();
+		System.out.println(len_walls);
+		int space = len_walls / (doorsNumber);
+		System.out.println(space);
+		int i = 0;
+		int cur_doors = 0;
+		while(cur_doors != doorsNumber) {
+			if (walls.get(i%len_walls).type != 2 && i % space == 0) {
+				walls.get(i%len_walls).type = 2; // oznaczenie punktu jako drzwi
+				cur_doors++;
+			} else {
+				makeBarier(walls.get(i%len_walls));
+			}
+			i++;
+		}
+	}
+
 	
 	public void makeBarier(Point pointe){//create barier fo walls
 		if(!pointe.blocked){
@@ -215,7 +256,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 					}
 				}
 				else if (pointer[x][y].type==1){
-					g.setColor(new Color(0.79f, 0.92f, 0.30f, 1f));
+					g.setColor(new Color(0.78f, 0.64f, 1f, 1f));
 				}
 				else if (pointer[x][y].type==2){
 					g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.7f));
@@ -255,7 +296,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	public void componentResized(ComponentEvent e) {
 		int dlugosc = (this.getWidth() / size) + 1;
 		int wysokosc = (this.getHeight() / size) + 1;
-		initialize(dlugosc, wysokosc);
+		int room = (this.roomSize/size) + 1;
+		initialize(dlugosc, wysokosc,room);
 	}
 
 	public void mouseDragged(MouseEvent e) {

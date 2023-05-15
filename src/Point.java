@@ -118,5 +118,11 @@ public class Point{
 			timeOfDeath = iteration;
 		}
 	}
+	public int undead(){
+		isAlive = true;
+		isPedestrian = false;
+		type = 0;
+		return timeOfDeath;
+	}
 	
 }

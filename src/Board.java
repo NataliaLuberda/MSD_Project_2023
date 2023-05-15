@@ -5,6 +5,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JComponent;
 import javax.swing.event.MouseInputListener;
@@ -21,6 +22,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	private static int fireConst = 2; //~ 10 / (10 - 4)
 	private int roomSize;
 	private int doorsNumber = 6;
+	private int numOfDead;
+	private HashMap<Integer,Integer> map = new HashMap<>();
 
 	public Board(int length, int height) {
 		addMouseListener(this);
@@ -32,6 +35,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		initialize(length, height,roomSize);
 		repulsionRadius = (int) (0.06*Math.min(length,height));
 		iteration = 0;
+		numOfDead = 0;
 	}
 
 	public void iteration() {
@@ -42,6 +46,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 				}
 			}
 		}
+		int timeOfDeath;
 		for (int x = 1; x < pointer.length - 1; ++x){
 			for (int y = 1; y < pointer[x].length - 1; ++y){
 				int tmp = pointer[x][y].move();
@@ -51,6 +56,15 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 					makeBarier(pointer[x][y]);
 				}else if(pointer[x][y].type ==4 && iteration % fireConst == 0){
 					calculateFire(pointer[x][y]);
+				}
+				if(!pointer[x][y].isAlive){
+					numOfDead += 1;
+					timeOfDeath = pointer[x][y].undead();
+					if(map.containsKey(timeOfDeath)){
+						map.put(timeOfDeath, map.get(timeOfDeath) + 1);
+					}else{
+						map.put(timeOfDeath, 1);
+					}
 				}
 			}
 		}
@@ -268,7 +282,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 					g.setColor(new Color(1f, 0.0f, 0.0f, 0.7f));
 				}
 				if(!pointer[x][y].isAlive){
-					g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.7f));
+					g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.3f));
 				}
 				g.fillRect((x * size) + 1, (y * size) + 1, (size - 1), (size - 1));
 			}

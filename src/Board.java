@@ -267,6 +267,9 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 				if (pointer[x][y].type == 4){
 					g.setColor(new Color(1f, 0.0f, 0.0f, 0.7f));
 				}
+				if(!pointer[x][y].isAlive){
+					g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.7f));
+				}
 				g.fillRect((x * size) + 1, (y * size) + 1, (size - 1), (size - 1));
 			}
 		}

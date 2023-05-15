@@ -18,6 +18,9 @@ public class Point{
 	public boolean checker = false;
 	private int iteration;
 	private static int peopleConst = 5; // 10 / (10 - 8)
+	public boolean isAlive;
+	private static float smokePoisoningVal = 0.3f;
+	public int timeOfDeath;
 
 	public Point(int x,int y) {
 		type=0;
@@ -26,12 +29,16 @@ public class Point{
 		this.x = x;
 		this.y = y;
 		iteration = 0;
+		isAlive = true;
+		timeOfDeath = -1;
 	}
 	
 	public void clear() {
 		staticField = SFMAX;
 		blocked = false;
 		smokeDensity = 0;
+		isAlive = true;
+		timeOfDeath = -1;
 	}
 
 	public boolean calcStaticField() {		
@@ -49,16 +56,19 @@ public class Point{
 	}
 	
 	public int move(){
-		if (isPedestrian && !blocked && iteration % peopleConst != 0){
+		if(isPedestrian){
+			checkAliveStatus();
+		}
+		if (isPedestrian && !blocked && iteration % peopleConst != 0 && isAlive){
 			Random random = new Random();
 			Point nextP = this;
 			ArrayList<Point> nextPos = new ArrayList<Point>();
 			double theSmallest = this.staticField;
 			for (Point neigh : neighbors){
-				if (neigh.staticField < theSmallest && !neigh.isPedestrian && neigh.type != 1) theSmallest = neigh.staticField;
+				if (neigh.staticField < theSmallest && !neigh.isPedestrian && neigh.type != 1 && neigh.isAlive) theSmallest = neigh.staticField;
 			}
 			for (Point neigh : neighbors){
-				if (neigh.staticField == theSmallest && !neigh.isPedestrian && neigh.type != 1) nextPos.add(neigh);
+				if (neigh.staticField == theSmallest && !neigh.isPedestrian && neigh.type != 1 && neigh.isAlive) nextPos.add(neigh);
 			}
 			if (!nextPos.isEmpty()) {
 				int id = random.nextInt(nextPos.size());
@@ -99,6 +109,13 @@ public class Point{
 		for(Point p: neighbors){
 			p.smokeDensity = 0;
 		
+		}
+	}
+
+	private void checkAliveStatus(){
+		if(isAlive && smokeDensity >= smokePoisoningVal){
+			isAlive = false;
+			timeOfDeath = iteration;
 		}
 	}
 	

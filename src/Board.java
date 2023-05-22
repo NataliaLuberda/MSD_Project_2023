@@ -20,7 +20,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	private int iteration;
 	private static int fireConst = 2; //~ 10 / (10 - 4)
 	private int roomSize;
-	private int doorsNumber = 6;
+	private int doorsNumber = 14;
 
 	public Board(int length, int height) {
 		addMouseListener(this);
@@ -256,7 +256,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 					}
 				}
 				else if (pointer[x][y].type==1){
-					g.setColor(new Color(0.78f, 0.64f, 1f, 1f));
+					g.setColor(new Color(0.5f, 0f, 0.5f, 1f));
 				}
 				else if (pointer[x][y].type==2){
 					g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.7f));

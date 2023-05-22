@@ -1,4 +1,7 @@
+package main;
 import javax.swing.JFrame;
+
+import main.GUI;
 
 public class Program extends JFrame {
 

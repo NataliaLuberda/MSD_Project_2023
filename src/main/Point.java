@@ -1,3 +1,4 @@
+package main;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -16,8 +17,11 @@ public class Point{
 	public int y;
 	public float smokeDensity = 0;
 	public boolean checker = false;
-	private int iteration;
-	private static int peopleConst = 5; // 10 / (10 - 8)
+	private int iterationInt;
+	private static int peopleConst = 2; // 10 / (10 - 8)
+	public boolean isAlive;
+	private static float smokePoisoningVal = 0.3f;
+	public int timeOfDeath;
 
 	public Point(int x,int y) {
 		type=0;
@@ -25,13 +29,17 @@ public class Point{
 		neighbors= new ArrayList<Point>();
 		this.x = x;
 		this.y = y;
-		iteration = 0;
+		iterationInt = 0;
+		isAlive = true;
+		timeOfDeath = -1;
 	}
 	
 	public void clear() {
 		staticField = SFMAX;
 		blocked = false;
 		smokeDensity = 0;
+		isAlive = true;
+		timeOfDeath = -1;
 	}
 
 	public boolean calcStaticField() {		
@@ -49,16 +57,19 @@ public class Point{
 	}
 	
 	public int move(){
-		if (isPedestrian && !blocked && iteration % peopleConst != 0){
+		if(isPedestrian){
+			checkAliveStatus();
+		}
+		if (isPedestrian && !blocked && iterationInt % peopleConst != 0 && isAlive){
 			Random random = new Random();
 			Point nextP = this;
 			ArrayList<Point> nextPos = new ArrayList<Point>();
 			double theSmallest = this.staticField;
 			for (Point neigh : neighbors){
-				if (neigh.staticField < theSmallest && !neigh.isPedestrian && neigh.type != 1) theSmallest = neigh.staticField;
+				if (neigh.staticField < theSmallest && !neigh.isPedestrian && neigh.type != 4  && neigh.type != 1 && neigh.isAlive) theSmallest = neigh.staticField;
 			}
 			for (Point neigh : neighbors){
-				if (neigh.staticField == theSmallest && !neigh.isPedestrian && neigh.type != 1) nextPos.add(neigh);
+				if (neigh.staticField == theSmallest && !neigh.isPedestrian && neigh.type != 4 && neigh.type != 1 && neigh.isAlive) nextPos.add(neigh);
 			}
 			if (!nextPos.isEmpty()) {
 				int id = random.nextInt(nextPos.size());
@@ -74,7 +85,7 @@ public class Point{
 			else if (nextP == this){ //trying random choose
 				for (Point neigh : neighbors){
 					int tmp = random.nextInt(100);
-					if (!neigh.isPedestrian && neigh.type != 1 && tmp < 10) nextP = neigh;
+					if (!neigh.isPedestrian && neigh.type != 1 && neigh.type != 4  && tmp < 10) nextP = neigh;
 				}
 				if (!nextP.isPedestrian){
 					if (nextP.type != 2){
@@ -85,7 +96,7 @@ public class Point{
 				}
 			}
 		}
-		iteration++;
+		iterationInt++;
 		return 0;
 		
 	}
@@ -100,6 +111,19 @@ public class Point{
 			p.smokeDensity = 0;
 		
 		}
+	}
+
+	private void checkAliveStatus(){
+		if(isAlive && smokeDensity >= smokePoisoningVal){
+			isAlive = false;
+			timeOfDeath = iterationInt;
+		}
+	}
+	public int undead(){
+		isAlive = true;
+		isPedestrian = false;
+		type = 0;
+		return timeOfDeath;
 	}
 	
 }

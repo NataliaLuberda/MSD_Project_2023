@@ -1,3 +1,4 @@
+package main;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -5,6 +6,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 import javax.swing.JComponent;
 import javax.swing.event.MouseInputListener;
@@ -17,10 +20,13 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 	private String version = "moore";
 	private int repulsionRadius;	
 	private static final int SFMAX = 100000;
-	private int iteration;
-	private static int fireConst = 2; //~ 10 / (10 - 4)
+	private int iterationInt;
+	private static int fireConst = 4; //~ 10 / (10 - 4)
 	private int roomSize;
-	private int doorsNumber = 14;
+	private int doorsNumber = 3;
+	private int numOfDead;
+	public HashMap<Integer,Integer> map = new HashMap<>();
+	private int peopleCount = 400;
 
 	public Board(int length, int height) {
 		addMouseListener(this);
@@ -31,7 +37,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		roomSize = Math.min(length,height)/5;
 		initialize(length, height,roomSize);
 		repulsionRadius = (int) (0.06*Math.min(length,height));
-		iteration = 0;
+		iterationInt = 0;
+		numOfDead = 0;
 	}
 
 	public void iteration() {
@@ -42,6 +49,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 				}
 			}
 		}
+		
+		int timeOfDeath;
 		for (int x = 1; x < pointer.length - 1; ++x){
 			for (int y = 1; y < pointer[x].length - 1; ++y){
 				int tmp = pointer[x][y].move();
@@ -49,13 +58,22 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 					clearFire(pointer[x][y]);
 				}else if(pointer[x][y].type == 1){
 					makeBarier(pointer[x][y]);
-				}else if(pointer[x][y].type ==4 && iteration % fireConst == 0){
+				}else if(pointer[x][y].type ==4 && iterationInt % fireConst == 0){
 					calculateFire(pointer[x][y]);
+				}
+				if(!pointer[x][y].isAlive){
+					numOfDead += 1;
+					timeOfDeath = pointer[x][y].undead();
+					if(map.containsKey(timeOfDeath)){
+						map.put(timeOfDeath, map.get(timeOfDeath) + 1);
+					}else{
+						map.put(timeOfDeath, 1);
+					}
 				}
 			}
 		}
 		this.repaint();
-		iteration++;
+		iterationInt++;
 	}
 
 	public void clear() {
@@ -72,6 +90,8 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
     ArrayList<Point> walls = new ArrayList<Point>();
     int centerX = length/2;
     int centerY = height/2;
+	ArrayList<Point> innerPoints = new ArrayList<Point>();
+
     for (int x = 0; x < pointer.length; ++x){
 		for (int y = 0; y < pointer[x].length; ++y){
 			pointer[x][y] = new Point(x,y);
@@ -107,7 +127,25 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 		walls.add(pointer[x][y]);
     }
 
+	for (int y = centerY - distanceFromCenter + 1; y < centerY + distanceFromCenter; y++) {
+		for (int x = centerX - distanceFromCenter + 1; x < centerX + distanceFromCenter; x++) {
+			innerPoints.add(pointer[x][y]);
+		}
+	}
+	Random random = new Random();
+	if (peopleCount > innerPoints.size()) {
+    	throw new IllegalArgumentException("Liczba osób przekracza dostępną liczbę miejsca w pokoju.");
+	}
 
+	int randomIndex = random.nextInt(innerPoints.size());
+	innerPoints.get(randomIndex).type = 4;
+	innerPoints.remove(randomIndex);
+
+	for(int i = 0; i < this.peopleCount;i++){
+		randomIndex = random.nextInt(innerPoints.size());
+		innerPoints.get(randomIndex).isPedestrian = true;
+		innerPoints.remove(randomIndex);
+	}
 
     for (int x = 1; x < pointer.length-1; ++x) {
         for (int y = 1; y < pointer[x].length-1; ++y) {
@@ -266,6 +304,9 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 				}
 				if (pointer[x][y].type == 4){
 					g.setColor(new Color(1f, 0.0f, 0.0f, 0.7f));
+				}
+				if(!pointer[x][y].isAlive){
+					g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.1f));
 				}
 				g.fillRect((x * size) + 1, (y * size) + 1, (size - 1), (size - 1));
 			}

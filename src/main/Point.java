@@ -60,7 +60,7 @@ public class Point{
 		if(isPedestrian){
 			checkAliveStatus();
 		}
-		if (isPedestrian && !blocked && iterationInt % peopleConst != 0 && isAlive){
+		if (isPedestrian && !blocked && isAlive && ((iterationInt % peopleConst != 0 && smokeDensity < 0.71) || (iterationInt % peopleConst == 0 && smokeDensity >= 0.71))){
 			Random random = new Random();
 			Point nextP = this;
 			ArrayList<Point> nextPos = new ArrayList<Point>();
